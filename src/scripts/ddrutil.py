@@ -10,7 +10,6 @@
 
 import ctypes
 import io
-import isoparser
 import os
 import struct
 import sys
