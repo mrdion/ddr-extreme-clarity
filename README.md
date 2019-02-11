@@ -1,6 +1,8 @@
 DDR EXTREME CLARITY
 ================================================================================
 
+![Gameplay Screenshot](screenshots/gameplay-screenshot.png)
+
 *DDR EXTREME CLARITY* is a mod for the game *Dance Dance Revolution EXTREME*
 that adds "FAST" and "SLOW" judgment indicators to the in-game UI.
 
@@ -12,6 +14,7 @@ timing.
 
 Building
 --------------------------------------------------------------------------------
+
 Building the hack requires access to an existing game image. The hack can be
 patched onto a vanilla version of *DDR EXTREME*, or it can be patched on top of
 *DDR EXTREME PRO* by SurvivorTEAM. The only thing that is required is the
@@ -60,3 +63,8 @@ After this has completed successfully, you now have a patched game image that
 you can add to a full disc image and burn to run on a System 573. For this, the
 `mkisofs` tool is recommended on macOS/Linux, and PowerISO is recommended on
 Windows.
+
+TO-DO
+--------------------------------------------------------------------------------
+- Add UI to results screen that shows number of early and late steps.
+- Option to disable feature in TEST menu.
