@@ -1,4 +1,4 @@
-TARGET    		:= early_late.bin
+TARGET    		:= clarity.bin
 SRCS      		:= checkstep_hook.s texcoord_hook.s vertex_hook.s
 BUILD_DIR 		:= ./build
 OBJS      		:= ${SRCS:%.s=${BUILD_DIR}/%.o}
