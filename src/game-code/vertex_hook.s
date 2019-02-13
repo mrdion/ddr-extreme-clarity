@@ -25,17 +25,11 @@ lhu     $t0, 0x16($v0)   # tpage
 bne     $t0, 0x8ff, ddr_polyft4_set_vertex_break
 
 lbu     $t0, 0xd($v0)    # tex_v0
-blt     $t0, 0x64, ddr_polyft4_set_vertex_break
+beq     $t0, 0x9d, ddr_polyft4_set_vertex_write_to_sprite # "FAST" sprite?
+beq     $t0, 0xb9, ddr_polyft4_set_vertex_write_to_sprite # "SLOW" sprite?
+b       ddr_polyft4_set_vertex_break # not ours. BAIL!!
 
-li      $t0, 0x801fffe0  # results from checkstep_hook
-lw      $t1, 0($t0)      # load player step time into t1
-lw      $t2, 4($t0)      # load chart step time into t2
-slt     $t3, $t1, $t2    # t3 = 1 if player stepped early
-
-sub     $t4, $t1, $t2    # t4 = time between step and chart
-abs     $t4, $t4         # abs(t4)
-blt     $t4, 3, ddr_polyft4_set_vertex_break # marvellous (don't show early/late)
-
+ddr_polyft4_set_vertex_write_to_sprite:
 lh      $t0, 0xa($v0)    # t0 = poly_ft4.y0
 sub     $t0, $t0, 0xe    # move y0 up to render larger sprite
 sh      $t0, 0xa($v0)    # overwrite poly_ft4.y0

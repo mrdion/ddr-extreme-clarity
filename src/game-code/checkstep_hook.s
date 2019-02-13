@@ -10,9 +10,17 @@
 #
 
 # jump to me from 0x80077618
-li $t1, 0x801fffe0      # somewhere in RAM
-sw $t2, 0($t1)          # store player step in game time
-sw $v1, 4($t1)          # store chart step in game time
+li      $t1, 0x801fffe0      # somewhere in RAM
+sw      $v1, 0($t1)          # store chart step in game time
 
-li $t1, 0x80077638      # load original jump location
-jr $t1                  # jump to original branch location
+beq     $s2, 0x80104450, ddr_checkstep_hook_p2 # check which player we are
+
+sw      $t2, 4($t1)          # store player 1 step in game time
+b       ddr_checkstep_hook_break
+
+ddr_checkstep_hook_p2:
+sw      $t2, 8($t1)          # store player 2 step in game time
+
+ddr_checkstep_hook_break:
+li      $t1, 0x80077638      # load original jump location
+jr      $t1                  # jump to original branch location

@@ -22,11 +22,22 @@ lhu     $t0, 0x16($a1)   # tpage
 bne     $t0, 0x8ff, ddr_polyft4_set_texcoord_break
 
 lbu     $t0, 0xd($a1)    # tex_v0
-blt     $t0, 0x64, ddr_polyft4_set_texcoord_break
+bne     $t0, 0x78, ddr_polyft4_set_texcoord_break
 
 li      $t0, 0x801fffe0  # results from checkstep_hook
-lw      $t1, 0($t0)      # load player step time into t1
-lw      $t2, 4($t0)      # load chart step time into t2
+lw      $t2, 0($t0)      # load chart step time into t2
+
+lhu     $t1, 0x8($a1)    # t1 = tex_x0
+beq     $t1, 0x5a, ddr_polyft4_set_texcoord_eval_p2
+
+ddr_polyft4_set_texcoord_eval_p1:
+lw      $t1, 4($t0)      # load player 1 step time into t1
+b       ddr_polyft4_set_texcoord_eval
+
+ddr_polyft4_set_texcoord_eval_p2:
+lw      $t1, 8($t0)      # load player 2 step time into t1
+
+ddr_polyft4_set_texcoord_eval:
 slt     $t3, $t1, $t2    # t3 = 1 if player stepped early
 
 sub     $t4, $t1, $t2    # t4 = time between step and chart
