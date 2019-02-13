@@ -10,7 +10,7 @@
 #
 
 # jump to me from 0x80077618
-li $t1, 0x800f3000      # somewhere in RAM
+li $t1, 0x801fffe0      # somewhere in RAM
 sw $t2, 0($t1)          # store player step in game time
 sw $v1, 4($t1)          # store chart step in game time
 

@@ -24,7 +24,7 @@ bne     $t0, 0x8ff, ddr_polyft4_set_texcoord_break
 lbu     $t0, 0xd($a1)    # tex_v0
 blt     $t0, 0x64, ddr_polyft4_set_texcoord_break
 
-li      $t0, 0x800f3000  # results from checkstep_hook
+li      $t0, 0x801fffe0  # results from checkstep_hook
 lw      $t1, 0($t0)      # load player step time into t1
 lw      $t2, 4($t0)      # load chart step time into t2
 slt     $t3, $t1, $t2    # t3 = 1 if player stepped early
