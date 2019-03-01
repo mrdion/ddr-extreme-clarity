@@ -57,6 +57,12 @@ def create_optparser():
                       action="store_true",
                       default=False,
                       help="whether the input file should be treated as compressed by DDR")
+    parser.add_option("-v", 
+                      "--verbose",
+                      dest="verbose",
+                      action="store_true",
+                      default=False,
+                      help="verbose output")
     
     return parser
 
@@ -141,7 +147,7 @@ def find_free_space(file, target_size, begin_offset=0, end_offset=None):
     
     return None
 
-def append_file(in_file_path, filename, compressed, game_image_path):
+def append_file(in_file_path, filename, compressed, game_image_path, verbose):
     success = False
 
     try:
@@ -162,6 +168,10 @@ def append_file(in_file_path, filename, compressed, game_image_path):
         
         if gamedat_file_section.length != GAME_DAT_SIZE:
             raise Exception("unexpected size for GAME.DAT file")
+        
+        if verbose:
+            print("found valid GAME.DAT at offset %x length %x" %
+                (gamedat_file_section.offset, gamedat_file_section.length))
         
         # start modifying the game image file
         with open(game_image_path, "rb+") as game_image_file:
@@ -185,6 +195,10 @@ def append_file(in_file_path, filename, compressed, game_image_path):
             if free_space == None:
                 raise Exception("unable to find a large enough contiguous free space region in file")
             
+            if verbose:
+                print("input file size: %u bytes" % in_file_size)
+                print("found free space at offset %x" % free_space)
+            
             # insert the input file into the game image
             game_image_file.seek(free_space, os.SEEK_SET)
             with open(in_file_path, "rb") as in_file:
@@ -199,12 +213,19 @@ def append_file(in_file_path, filename, compressed, game_image_path):
                 ft_entry = FileTableEntry()
                 ft_entry.filename_hash = hash_filename(filename)
                 filetable.insert_entry(ft_entry)
+                
+                if verbose:
+                    print("inserting new filetable entry: %s" % ft_entry)
+            elif verbose:
+                print("found existing filetable entry: %s" % ft_entry)
             
             ft_entry.offset = free_space - gamedat_offset
             ft_entry.length = in_file_size
             ft_entry.compression_flags = (0x1 if compressed else 0x0)
             
             # overwrite the file table
+            if verbose:
+                print("writing file to offset %x" % (gamedat_offset + FILE_TABLE_OFFSET))
             game_image_file.seek(gamedat_offset + FILE_TABLE_OFFSET, os.SEEK_SET)
             game_image_file.write(filetable.data())
 
@@ -230,16 +251,12 @@ def main(argv):
         print_err("a path to a file to add is required.")
         retval = 1
     else:
-        in_file_path = options.file
-        filename = options.name
-        compressed = options.compressed
-        game_image_path = args[1]
-        
         success = append_file(
-            in_file_path=in_file_path,
-            filename=filename,
-            compressed=compressed,
-            game_image_path=game_image_path
+            in_file_path=options.file,
+            filename=options.name,
+            compressed=options.compressed,
+            game_image_path=args[1],
+            verbose=options.verbose
         )
         retval = 0 if success else 1
     
