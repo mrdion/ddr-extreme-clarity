@@ -9,18 +9,42 @@
 # written by zanneth <root@zanneth.com>
 #
 
+# struct ddr_player_clarity_stats_t
+# {
+#     uint32_t chart_step_time;         [00 32-bits]
+#     uint32_t player_step_game_time;   [04 32-bits]
+#     uint32_t fast_count;              [08 32-bits]
+#     uint32_t slow_count;              [12 32-bits]
+# }
+#
+# total size = 16 bytes
+# one instance per player
+
 # jump to me from 0x80077618
-li      $t1, 0x801fffe0      # somewhere in RAM
 
-beq     $s2, 0x80104450, ddr_checkstep_hook_p2 # check which player we are
+li      $t1, 0x801fffd0      # somewhere in RAM
 
-sw      $v1, 0($t1)          # store player 1 chart step in game time
-sw      $t2, 4($t1)          # store player 1 step in game time
-b       ddr_checkstep_hook_break
+slt     $t4, $t2, $v1        # t4 = 1 if player stepped early
+sub     $t5, $t2, $v1        # t5 = time between step and chart
+abs     $t5, $t5             # t5 = abs(t5)
 
-ddr_checkstep_hook_p2:
-sw      $v1, 8($t1)          # store player 2 chart step in game time
-sw      $t2, 12($t1)         # store player 2 step in game time
+bne     $s2, 0x80104450, ddr_checkstep_hook_check # if s2 != 0x80104450, we are player 1
+addiu   $t1, 16              # t1 += sizeof(struct ddr_player_clarity_stats_t)
+
+ddr_checkstep_hook_check:
+sw      $v1, 0($t1)          # player.chart_step_time = $v1
+sw      $t2, 4($t1)          # player.player_step_time = $t2
+
+blt     $t5, 3, ddr_checkstep_hook_break # marvelous (don't increment early/late)
+
+addiu   $t1, 8               # t1 = &(player.fast_count)
+bgtz    $t4, ddr_checkstep_hook_increment
+addiu   $t1, 4               # t1 = &(player.slow_count)
+
+ddr_checkstep_hook_increment:
+lw      $t4, 0($t1)
+addiu   $t4, 1
+sw      $t4, 0($t1)
 
 ddr_checkstep_hook_break:
 li      $t1, 0x80077638      # load original jump location
