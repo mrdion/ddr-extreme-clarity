@@ -6,14 +6,15 @@
 
 # jump to me from 8006C9DC
 
+lhu     $t3, 0xe($a1)       # t3 = CLUT ID
+bne     $t3, 0xfec0, ddr_results_texcoord_break # not our sprite. bail!!
+
 lw      $t2, 0x64($sp)      # sp+0x64 = current judgment sprite index (1-based)
 beq     $t2, 8, ddr_results_texcoord_fast_row
 beq     $t2, 9, ddr_results_texcoord_slow_row
 b       ddr_results_texcoord_break  # not our sprite. bail!!
 
 ddr_results_texcoord_fast_row:
-bne     $t3, 0xa8, ddr_results_texcoord_break   # bail if we're drawing a number
-
 li      $t1, 0x60       # t1 = 96
 sb      $t1, 0xc($a1)   # SPRT.tex_u0 = t1 (must be even)
 
@@ -26,8 +27,6 @@ sb      $t1, 0x12($a1)  # SPRT.h = t1
 b       ddr_results_texcoord_break
 
 ddr_results_texcoord_slow_row:
-bne     $t3, 0xc0, ddr_results_texcoord_break   # bail if we're drawing a number
-
 li      $t1, 0x60       # t1 = 96
 sb      $t1, 0xc($a1)   # SPRT.tex_u0 = t1
 sb      $t1, 0xd($a1)   # SPRT.tex_v0 = t1
