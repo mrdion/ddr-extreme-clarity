@@ -6,6 +6,10 @@
 
 # jump to me from 8006C9DC
 
+li      $t1, 0x800F0048     # load ptr to global game mode
+lb      $t2, 0($t1)         # load game mode into $t2
+bne     $t2, 0, ddr_results_texcoord_break # don't do anything if we're not in normal mode
+
 lhu     $t3, 0xe($a1)       # t3 = CLUT ID
 bne     $t3, 0xfec0, ddr_results_texcoord_break # not our sprite. bail!!
 
