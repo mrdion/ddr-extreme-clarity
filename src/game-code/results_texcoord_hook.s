@@ -20,6 +20,9 @@ sb      $t1, 0xc($a1)   # SPRT.tex_u0 = t1 (must be even)
 li      $t1, 0x3f       # t1 = 63
 sb      $t1, 0xd($a1)   # SPRT.tex_v0 = t1 (doesn't have to be even)
 
+li      $t1, 0x15       # t1 = 21
+sb      $t1, 0x12($a1)  # SPRT.h = t1
+
 b       ddr_results_texcoord_break
 
 ddr_results_texcoord_slow_row:
