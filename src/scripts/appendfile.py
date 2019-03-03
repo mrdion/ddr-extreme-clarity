@@ -202,6 +202,9 @@ def append_file(in_file_path, filename, compressed, game_image_path, verbose):
             # insert the input file into the game image
             game_image_file.seek(free_space, os.SEEK_SET)
             with open(in_file_path, "rb") as in_file:
+                if verbose:
+                    print("writing input file to game image")
+                
                 game_image_file.write(in_file.read())
             
             # modify the file table to point to the new input file
@@ -209,23 +212,26 @@ def append_file(in_file_path, filename, compressed, game_image_path, verbose):
                 filename = os.path.basename(in_file_path)
             
             ft_entry = filetable.find_entry(filename)
+            inserting_new_entry = False
             if ft_entry == None:
                 ft_entry = FileTableEntry()
                 ft_entry.filename_hash = hash_filename(filename)
-                filetable.insert_entry(ft_entry)
-                
-                if verbose:
-                    print("inserting new filetable entry: %s" % ft_entry)
+                inserting_new_entry = True
             elif verbose:
                 print("found existing filetable entry: %s" % ft_entry)
             
             ft_entry.offset = free_space - gamedat_offset
             ft_entry.length = in_file_size
             ft_entry.compression_flags = (0x1 if compressed else 0x0)
+           
+            if inserting_new_entry:
+                filetable.insert_entry(ft_entry)
+                if verbose:
+                    print("inserting new filetable entry: %s" % ft_entry)
             
             # overwrite the file table
             if verbose:
-                print("writing file to offset %x" % (gamedat_offset + FILE_TABLE_OFFSET))
+                print("writing filetable to offset %x" % (gamedat_offset + FILE_TABLE_OFFSET))
             game_image_file.seek(gamedat_offset + FILE_TABLE_OFFSET, os.SEEK_SET)
             game_image_file.write(filetable.data())
 

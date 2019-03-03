@@ -22,6 +22,12 @@ GAME_EXE_TEXT_SECTION_START = 0x80010000
 
 class FileTableEntry:
     def __init__(self, bytes=None):
+        self.filename_hash = 0
+        self.offset = 0
+        self.length = 0
+        self.compression_flags = 0
+        self.entry_offset = 0
+        
         if bytes != None:
             self._arr = struct.unpack("<LLLL", bytes)
 
