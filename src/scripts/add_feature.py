@@ -29,10 +29,14 @@ import sys
 JUDGMENT_SPRITESHEET_GAME_FILENAME  = "data/gpct/dance/gmob_25.cmt"
 USELESS_CODE_TEXT_ADDR              = 0x8003B268 # overwrite the DIP SWITCH CHECK
 GAME_EXECUTABLE_PATCHES             = [
-#     payload name        destination
-    ("checkstep_hook",    0x80077618),
-    ("texcoord_hook",     0x8005A5A4),
-    ("vertex_hook",       0x8005B6FC),
+#     payload name              destination
+    ("init_player_stats_hook",  0x80025DF0),
+    ("reset_player_stats_hook", 0x80076490),
+    ("checkstep_hook",          0x80077618),
+    ("texcoord_hook",           0x8005A5A4),
+    ("vertex_hook",             0x8005B6FC),
+    ("results_load_hook",       0x80061154),
+    ("results_texcoord_hook",   0x8006C9DC),
 ]
 
 # ------------------------------------------------------------------------------

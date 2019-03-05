@@ -19,12 +19,14 @@
 # struct ddr_player_clarity_stats_t
 # {
 #     uint32_t chart_step_time;         [00 32-bits]
-#     uint32_t player_step_game_time;   [04 32-bits]
+#     uint32_t player_step_time;        [04 32-bits]
 #     uint32_t fast_count;              [08 32-bits]
-#     uint32_t slow_count;              [12 32-bits]
+#     uint32_t total_fast_count;        [12 32-bits]
+#     uint32_t slow_count;              [16 32-bits]
+#     uint32_t total_slow_count;        [20 32-bits]
 # }
 #
-# total size = 16 bytes
+# total size = 24 bytes
 # one instance per player
 
 # jump to me from 0x8005A5A4
@@ -39,11 +41,11 @@ li      $t0, 0x801fffd0  # results from checkstep_hook
 
 lhu     $t1, 0x8($a1)    # t1 = tex_x0
 bne     $t1, 0x5a, ddr_polyft4_set_texcoord_eval
-addiu   $t0, 16          # t0 += sizeof(struct ddr_player_clarity_stats_t)
+addiu   $t0, 24          # t0 += sizeof(struct ddr_player_clarity_stats_t)
 
 ddr_polyft4_set_texcoord_eval:
-lw      $t2, 0($t0)      # load player 1 chart step time into t2
-lw      $t1, 4($t0)      # load player 1 step time into t1
+lw      $t2, 0($t0)      # load player chart step time into t2
+lw      $t1, 4($t0)      # load player step time into t1
 
 slt     $t3, $t1, $t2    # t3 = 1 if player stepped early
 

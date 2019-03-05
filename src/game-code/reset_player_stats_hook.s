@@ -1,5 +1,5 @@
 #
-# init_player_stats_hook.s
+# reset_player_stats_hook.s
 #
 # written by zanneth <root@zanneth.com>
 #
@@ -17,15 +17,19 @@
 # total size = 24 bytes
 # one instance per player
 
-# jump to me from 80025DF0
+# jump to me from 80076490
 
 li      $t1, 0x801fffd0     # RAM location of clarity stats
-li      $t2, 12             # 6 words (24 bytes) per player that we need to clear
+li      $t2, 2              # number of players
 
-ddr_init_player_stats_loop:
-sw      $0, 0($t1)          # zero out word in stats struct
-addiu   $t1, 4              # t1 = ptr to next field
+ddr_reset_player_stats_hook_loop:
+sw      $0, 0($t1)          # chart_step_time = 0
+sw      $0, 4($t1)          # player_step_time = 0
+sw      $0, 8($t1)          # fast_count = 0
+sw      $0, 16($t1)         # slow_count = 0
+
+addiu   $t1, 24             # t1 = ptr to next player's stats struct
 addiu   $t2, -1             # t2--
-bne     $t2, $0, ddr_init_player_stats_loop
+bne     $t2, 0, ddr_reset_player_stats_hook_loop
 
 jr      $ra                 # jump to original location
