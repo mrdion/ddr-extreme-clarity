@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from add_feature import *
+from add_clarity import *
 from calcjmp import *
 
 import ddrutil
@@ -14,12 +14,17 @@ def mamepatch(manifest_path):
     for patch in GAME_EXECUTABLE_PATCHES:
         payload_name = patch[0]
         dst_addr = patch[1]
+        patch_type = patch[2]
         
         payload_item = manifest.get_payload_item(payload_name)
-        jmp_addr = USELESS_CODE_TEXT_ADDR + payload_item.offset
-        jmp = calcjmp(jmp_addr, MIPSJumpType.UNCONDITIONAL)
         
-        mame_cmds.append("d@(%X)=%X;" % (dst_addr, jmp))
+        if patch_type == PatchType.UNCONDITIONAL_JUMP:
+            jmp_addr = USELESS_CODE_TEXT_ADDR + payload_item.offset
+            jmp = calcjmp(jmp_addr, MIPSJumpType.UNCONDITIONAL)
+            mame_cmds.append("d@(%X)=%X;" % (dst_addr, jmp))
+        elif patch_type == PatchType.ADDRESS_TRANSPOSITION:
+            off = USELESS_CODE_TEXT_ADDR + payload_item.offset
+            mame_cmds.append("d@(%X)=%X;" % (dst_addr, off))
     
     return mame_cmds
 
