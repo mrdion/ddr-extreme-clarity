@@ -19,6 +19,7 @@
 
 # jump to me from 80061154
 # need to return to either 8006115C, 80061174 or 8006112C
+
 li      $t1, 0x801fffd0                 # clarity stats struct location
 bne     $a1, 4, ddr_results_load_verify # if a1 != 4, we are player 1
 addiu   $t1, 24                         # t1 += sizeof(struct ddr_player_clarity_stats_t)

@@ -20,6 +20,7 @@
 #
 
 # jump to me from 0x8005B6FC
+
 lhu     $t0, 0x16($v0)   # tpage
 bne     $t0, 0x8ff, ddr_polyft4_set_vertex_break
 
