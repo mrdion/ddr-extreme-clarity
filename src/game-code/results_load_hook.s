@@ -18,7 +18,10 @@
 # one instance per player
 
 # jump to me from 80061154
-# need to return to either 8006115C, 80061174 or 8006112C
+# need to return to either 8006115C, 80061174, 8006112C, or 800610C0
+
+lw      $t3, 0xd0($sp)                  # t3 = ptr to ddr mode info
+lw      $t3, 0x18($t3)                  # t3 = results mode type (0 if regular, 1 if total)
 
 li      $t1, 0x801fffd0                 # clarity stats struct location
 bne     $a1, 4, ddr_results_load_verify # if a1 != 4, we are player 1
@@ -30,17 +33,40 @@ beq     $t2, 8, ddr_results_load_slow   # if t2 == 8, it's our added "slow" spri
 beq     $t2, 9, ddr_results_load_score  # if t2 == 9, redirect control flow to "score" branch
 b       ddr_results_load_return_default # otherwise, not ours. bail!!
 
+# ------------------------------------------------------------------------------
+
 ddr_results_load_fast:
+beq     $t3, 1, ddr_results_load_fast_total # if t3 == 1, we're showing the total results screen
+
 lw      $s0, 8($t1)                     # s0 is the number to display, s0 = fast_count
 b       ddr_results_load_return_fast_slow
 
+ddr_results_load_fast_total:
+lw      $s0, 12($t1)                    # s0 is the number to display, s0 = total_fast_count
+b       ddr_results_load_return_fast_slow_total
+
+# ------------------------------------------------------------------------------
+
 ddr_results_load_slow:
+beq     $t3, 1, ddr_results_load_slow_total # if t3 == 1, we're showing the total results screen
+
 lw      $s0, 16($t1)                    # s0 is the number to display, s0 = slow_count
 b       ddr_results_load_return_fast_slow
+
+ddr_results_load_slow_total:
+lw      $s0, 20($t1)                    # s0 is the number to display, s0 = total_slow_count   
+b       ddr_results_load_return_fast_slow_total
+
+# ------------------------------------------------------------------------------
 
 ddr_results_load_return_fast_slow:
 li      $t1, 0x8006112C                 # redirect control flow back through code
                                         # that handles normal numerical results
+jr      $t1                             # jump
+
+ddr_results_load_return_fast_slow_total:
+li      $t1, 0x800610C0                 # redirect control flow back through code
+                                        # that handles the total results path
 jr      $t1                             # jump
 
 ddr_results_load_score:
