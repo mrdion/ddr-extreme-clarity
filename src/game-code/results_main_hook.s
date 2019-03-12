@@ -1,6 +1,26 @@
 #
 # results_main_hook.s
 #
+# there is not enough space on some types of results screens to add the two
+# extra score entries that we need to show "FAST" and "SLOW". furthermore, the
+# spritesheet that we replaced has valuable data on it for these types of
+# results screens that we overwrote to add the "FAST" and "SLOW" UI cells. for
+# example, the ONI results screen shows a password and time interval on the
+# bottom, and the NONSTOP results screen sometimes shows a password depending on
+# the course that was played.
+#
+# it's not enough to prevent our other hooks from running in these scenarios,
+# because in order to trick the results screen into showing more score entries
+# than what was previously possible, we have to patch numerous immediate values
+# that are hardcoded in the game's binary. therefore, the only option is to
+# actually patch the results screen code at runtime right before it shows up on
+# screen.
+#
+# this hook is executed from a jump table entry that is located at 0x800D8B70,
+# and does the initial preparation to show all types of results screens. we have
+# to check the global game mode value to determine if we need to patch or
+# unpatch the results screen.
+#
 # /!\ WARNING /!\
 # assumes that the replacement "rslob_25.cmt" sprite got loaded at file offset
 # 0x68800!

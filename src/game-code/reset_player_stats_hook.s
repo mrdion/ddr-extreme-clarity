@@ -1,6 +1,10 @@
 #
 # reset_player_stats_hook.s
 #
+# hook into a routine that executes right before the player is about to start a
+# song. we only want to clear the stats that are pertinent to the last played
+# song, not the running stats for the entire game (e.g. total_*_count).
+#
 # written by zanneth <root@zanneth.com>
 #
 

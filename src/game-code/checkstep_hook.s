@@ -4,7 +4,9 @@
 # hooks into a specific place in the game code where a step is evaluated.
 #
 # this code grabs values stored in registers t1 and v2 and stores them
-# somewhere in RAM to be accessed later by other hooks.
+# somewhere in RAM to be accessed later by other hooks. it also computes whether
+# the player stepped early or late and increments the respective counter if
+# necessary.
 #
 # written by zanneth <root@zanneth.com>
 #

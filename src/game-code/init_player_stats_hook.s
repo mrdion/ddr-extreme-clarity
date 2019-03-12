@@ -1,6 +1,10 @@
 #
 # init_player_stats_hook.s
 #
+# hook in to a routine that executes as soon as the player presses the start
+# button to start a game. this clears all of the stats stored in RAM before the
+# game starts.
+#
 # written by zanneth <root@zanneth.com>
 #
 

@@ -1,6 +1,18 @@
 #
 # results_load_hook.s
 #
+# hook into the routine that runs when loading the score value for a particular
+# score entry on the results screen. this code assumes that `results_main_hook`
+# already executed and performed the correct runtime patching of the code that
+# draws the results screen. this code previously inserted two new score entries
+# for "FAST" and "SLOW", and when we are loading a value for one of these, load
+# it from the clarity stats struct in RAM instead of from the player stats.
+#
+# the tricky thing about this particular hook is that we need to carefully
+# redirect execution flow depending on what we loaded (or didn't load).
+# otherwise, incorrect values will be loaded for various parameters that direct
+# how the results screen is drawn and the game will crash.
+#
 # written by zanneth <root@zanneth.com>
 #
 

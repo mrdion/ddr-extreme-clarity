@@ -1,6 +1,14 @@
 #
 # results_texcoord_hook.s
 #
+# hook into the drawing code that configures each sprite for the score entry
+# list (e.g. "032", "MARVELOUS", "049", "PERFECT"). the main results screen code
+# uses arithmetic to draw the next icon in the spritesheet based on the index of
+# which one we are drawing. since we had to place our "FAST" and "SLOW" graphics
+# in arbitrary places within the spritesheet, we have to correct the texture
+# coordinates for these particular sprites before they are sent to the draw
+# graph.
+#
 # written by zanneth <root@zanneth.com>
 #
 
