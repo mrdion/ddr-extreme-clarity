@@ -11,10 +11,13 @@ def mamepatch(manifest_path):
     mame_cmds = []
     manifest = PayloadManifest(manifest_path)
     
-    for patch in GAME_EXECUTABLE_PATCHES:
-        payload_name = patch[0]
-        dst_addr = patch[1]
-        patch_type = patch[2]
+    for patch_tuple in GAME_EXECUTABLE_PATCHES:
+        mame_cmds.append("d@(%X)=%X;" % (patch_tuple[0], patch_tuple[1]))
+    
+    for hook in GAME_EXECUTABLE_HOOKS:
+        payload_name = hook[0]
+        dst_addr = hook[1]
+        patch_type = hook[2]
         
         payload_item = manifest.get_payload_item(payload_name)
         

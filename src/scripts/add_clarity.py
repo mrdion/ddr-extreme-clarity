@@ -36,6 +36,10 @@ RESULTS_SPRITESHEET_GAME_FILENAME   = "data/gpct/result/rslob_25.cmt"
 RESULTS_SPRITESHEET_DST_OFFSET      = 0x68800 # hardcoded in results_main_hook.s
 USELESS_CODE_TEXT_ADDR              = 0x8003B268 # overwrite the DIP SWITCH CHECK
 GAME_EXECUTABLE_PATCHES             = [
+#   destination     value
+    (0x80066758,    0x10000007) # don't show "TryExtraStage!!" text--no more space
+]
+GAME_EXECUTABLE_HOOKS               = [
 #   payload name                destination  type
     ("init_player_stats_hook",  0x80025DF0,  PatchType.UNCONDITIONAL_JUMP),
     ("reset_player_stats_hook", 0x80076490,  PatchType.UNCONDITIONAL_JUMP),
@@ -136,17 +140,28 @@ def patch_game_executable(payload_manifest_path, shellcode_text_addr, game_dat_f
         
         # create hook targets for each payload item
         hook_targets = []
-        for patch_tuple in GAME_EXECUTABLE_PATCHES:
-            payload_item = manifest.get_payload_item(patch_tuple[0])
+        for hook_tuple in GAME_EXECUTABLE_HOOKS:
+            payload_item = manifest.get_payload_item(hook_tuple[0])
             
             if payload_item == None:
-                raise Exception("required shellcode \"%s\" not found in payload" % patch_tuple[0])
+                raise Exception("required shellcode \"%s\" not found in payload" % hook_tuple[0])
             
-            hook_target = HookTarget(payload_item, patch_tuple[1], patch_tuple[2])
+            hook_target = HookTarget(payload_item, hook_tuple[1], hook_tuple[2])
             hook_targets.append(hook_target)
         
         # open GAME.DAT file and start patching
         with open(game_dat_file_path, "rb+") as game_dat_file:
+            # perform simple binary patches first
+            for patch_tuple in GAME_EXECUTABLE_PATCHES:
+                patch_dst_text_addr = patch_tuple[0]
+                patch_dst_offset = ddrutil.exe_text_addr_to_game_dat_offset(patch_dst_text_addr)
+                patch_value = patch_tuple[1]
+                patch_data = struct.pack("<I", patch_value)
+                
+                game_dat_file.seek(patch_dst_offset, os.SEEK_SET)
+                game_dat_file.write(patch_data)
+            
+            # next, patch using all of the hook targets
             for hook_target in hook_targets:
                 payload_text_addr = shellcode_text_addr + hook_target.payload_item.offset
                 hook_dst_offset = ddrutil.exe_text_addr_to_game_dat_offset(hook_target.hook_text_addr)
