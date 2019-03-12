@@ -45,15 +45,16 @@ make
 This will output two files into the `game-code/build` directory. Both of these
 will be required for the next step.
 
-Next, run the `add_feature.py` script to patch an existing `GAME.DAT` game image
-file. The paths to the replacement spritesheet image file, concatenated game
+Next, run the `add_clarity.py` script to patch an existing `GAME.DAT` game image
+file. The paths to the replacement spritesheet image files, concatenated game
 code payload, game code manifest, and the `GAME.DAT` game image file must all be
 provided.
 
 ```
 cd scripts
-./add_feature.py \
-    --spritesheet ../../img/gmob_25_early_late.tim \
+./add_clarity.py \
+    --judgment-spritesheet ../../img/gmob_25_early_late.tim \
+    --results-spritesheet ../../img/rslob_25_early_late.tim \
     --payload ../game-code/build/clarity.bin \
     --manifest ../game-code/build/manifest.json \
     <path-to-GAME-DAT>

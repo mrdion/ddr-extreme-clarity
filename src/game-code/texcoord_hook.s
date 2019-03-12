@@ -16,6 +16,19 @@
 # written by zanneth <root@zanneth.com>
 #
 
+# struct ddr_player_clarity_stats_t
+# {
+#     uint32_t chart_step_time;         [00 32-bits]
+#     uint32_t player_step_time;        [04 32-bits]
+#     uint32_t fast_count;              [08 32-bits]
+#     uint32_t total_fast_count;        [12 32-bits]
+#     uint32_t slow_count;              [16 32-bits]
+#     uint32_t total_slow_count;        [20 32-bits]
+# }
+#
+# total size = 24 bytes
+# one instance per player
+
 # jump to me from 0x8005A5A4
 
 lhu     $t0, 0x16($a1)   # tpage
@@ -24,26 +37,21 @@ bne     $t0, 0x8ff, ddr_polyft4_set_texcoord_break
 lbu     $t0, 0xd($a1)    # tex_v0
 bne     $t0, 0x78, ddr_polyft4_set_texcoord_break
 
-li      $t0, 0x801fffe0  # results from checkstep_hook
+li      $t0, 0x801fffd0  # results from checkstep_hook
 
 lhu     $t1, 0x8($a1)    # t1 = tex_x0
-beq     $t1, 0x5a, ddr_polyft4_set_texcoord_eval_p2
-
-ddr_polyft4_set_texcoord_eval_p1:
-lw      $t2, 0($t0)      # load player 1 chart step time into t2
-lw      $t1, 4($t0)      # load player 1 step time into t1
-b       ddr_polyft4_set_texcoord_eval
-
-ddr_polyft4_set_texcoord_eval_p2:
-lw      $t2, 8($t0)      # load player 2 chart step time into t2
-lw      $t1, 12($t0)     # load player 2 step time into t1
+bne     $t1, 0x5a, ddr_polyft4_set_texcoord_eval
+addiu   $t0, 24          # t0 += sizeof(struct ddr_player_clarity_stats_t)
 
 ddr_polyft4_set_texcoord_eval:
+lw      $t2, 0($t0)      # load player chart step time into t2
+lw      $t1, 4($t0)      # load player step time into t1
+
 slt     $t3, $t1, $t2    # t3 = 1 if player stepped early
 
 sub     $t4, $t1, $t2    # t4 = time between step and chart
 abs     $t4, $t4         # abs(t4)
-blt     $t4, 3, ddr_polyft4_set_texcoord_break # marvellous (don't show early/late)
+blt     $t4, 3, ddr_polyft4_set_texcoord_break # marvelous (don't show early/late)
 bgt     $t4, 17, ddr_polyft4_set_texcoord_break # invalid step (also don't show)
 
 li      $t2, 0x3c        # x-texcoord (right) for early/late combo sprites

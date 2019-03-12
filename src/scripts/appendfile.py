@@ -24,6 +24,7 @@ from enum import Enum
 
 GAME_DAT_MAGICNUM = (0x24, b"PS-X EXE")
 ISO9660_MAGICNUM  = (0x8001, b"\x43\x44\x30\x30\x31")
+FREE_SPACE_TOKEN  = 0xff
 
 # -----------------------------------------------------------------------------
 
@@ -118,10 +119,9 @@ def get_game_dat_file_section(path):
     return game_dat_file_section
 
 def find_free_space(file, target_size, begin_offset=0, end_offset=None):
-    chunk_size = 1024
-    token = 0xff
-    crumb = None
-    cur_offset = begin_offset
+    chunk_size  = 1024
+    crumb       = None
+    cur_offset  = begin_offset
 
     file.seek(begin_offset, os.SEEK_SET)
     while end_offset == None or cur_offset < end_offset:
@@ -134,7 +134,7 @@ def find_free_space(file, target_size, begin_offset=0, end_offset=None):
             break
         
         for b in chunk:
-            if b == token:
+            if b == FREE_SPACE_TOKEN:
                 if crumb == None and FileTableEntry.offset_is_aligned(cur_offset - begin_offset):
                     crumb = cur_offset
                 
@@ -147,7 +147,30 @@ def find_free_space(file, target_size, begin_offset=0, end_offset=None):
     
     return None
 
-def append_file(in_file_path, filename, compressed, game_image_path, verbose):
+def verify_free_space(file, target_offset, target_size):
+    chunk_size = 1024
+    bytes_read = 0
+    
+    file.seek(target_offset, os.SEEK_SET)
+    while bytes_read < target_size:
+        chunk = file.read(min(chunk_size, target_size - bytes_read))
+        if len(chunk) == 0:
+            break
+        
+        for b in chunk:
+            if b != FREE_SPACE_TOKEN:
+                return False
+            
+            bytes_read += 1
+    
+    return True
+
+def append_file(in_file_path, 
+                filename,
+                compressed,
+                game_image_path,
+                dst_offset=None,
+                verbose=False):
     success = False
 
     try:
@@ -158,6 +181,10 @@ def append_file(in_file_path, filename, compressed, game_image_path, verbose):
         # verify a valid input file was provided
         if not os.path.exists(in_file_path):
             raise FileNotFoundError("input file \"%s\" does not exist" % in_file_path)
+            
+        # verify that a valid destination offset was provided
+        if dst_offset != None and not FileTableEntry.offset_is_aligned(dst_offset):
+            raise Exception("destination offset 0x%x is not properly aligned" % dst_offset)
         
         # compute game dat file section info
         gamedat_file_section = get_game_dat_file_section(game_image_path)
@@ -181,27 +208,38 @@ def append_file(in_file_path, filename, compressed, game_image_path, verbose):
             # read file table from game image
             game_image_file.seek(gamedat_offset + FILE_TABLE_OFFSET, os.SEEK_SET)
             filetable = FileTable(game_image_file)
-
-            # compute space necessary to insert input file, and find available
-            # free space in the game image file where we can put it
-            in_file_size = os.stat(in_file_path).st_size
-            free_space = find_free_space(game_image_file, 
-                                         in_file_size,
-                                         gamedat_offset,
-                                         gamedat_offset + gamedat_length)
             
+            # if an explicit offset was provided, make sure there is space in
+            # the game binary to fit it
+            in_file_size = os.stat(in_file_path).st_size
+            if dst_offset != None:
+                valid_dst = verify_free_space(game_image_file, dst_offset, in_file_size)
+                
+                if not valid_dst:
+                    raise Exception("provided destination offset %x does not correspond to free space in game image" % dst_offset)
+            else:
+                # compute space necessary to insert input file, and find available
+                # free space in the game image file where we can put it
+                dst_offset = find_free_space(game_image_file, 
+                                             in_file_size,
+                                             gamedat_offset,
+                                             gamedat_offset + gamedat_length)
+                
             # if there isn't a big enough free space contiguous region, we
             # can't do anything else
-            if free_space == None:
+            if dst_offset == None:
                 raise Exception("unable to find a large enough contiguous free space region in file")
             
             if verbose:
                 print("input file size: %u bytes" % in_file_size)
-                print("found free space at offset %x" % free_space)
+                print("found free space at offset %x" % dst_offset)
             
             # insert the input file into the game image
-            game_image_file.seek(free_space, os.SEEK_SET)
+            game_image_file.seek(dst_offset, os.SEEK_SET)
             with open(in_file_path, "rb") as in_file:
+                if verbose:
+                    print("writing input file to game image")
+                
                 game_image_file.write(in_file.read())
             
             # modify the file table to point to the new input file
@@ -209,23 +247,26 @@ def append_file(in_file_path, filename, compressed, game_image_path, verbose):
                 filename = os.path.basename(in_file_path)
             
             ft_entry = filetable.find_entry(filename)
+            inserting_new_entry = False
             if ft_entry == None:
                 ft_entry = FileTableEntry()
                 ft_entry.filename_hash = hash_filename(filename)
-                filetable.insert_entry(ft_entry)
-                
-                if verbose:
-                    print("inserting new filetable entry: %s" % ft_entry)
+                inserting_new_entry = True
             elif verbose:
                 print("found existing filetable entry: %s" % ft_entry)
             
-            ft_entry.offset = free_space - gamedat_offset
+            ft_entry.offset = dst_offset - gamedat_offset
             ft_entry.length = in_file_size
             ft_entry.compression_flags = (0x1 if compressed else 0x0)
+           
+            if inserting_new_entry:
+                filetable.insert_entry(ft_entry)
+                if verbose:
+                    print("inserting new filetable entry: %s" % ft_entry)
             
             # overwrite the file table
             if verbose:
-                print("writing file to offset %x" % (gamedat_offset + FILE_TABLE_OFFSET))
+                print("writing filetable to offset %x" % (gamedat_offset + FILE_TABLE_OFFSET))
             game_image_file.seek(gamedat_offset + FILE_TABLE_OFFSET, os.SEEK_SET)
             game_image_file.write(filetable.data())
 
