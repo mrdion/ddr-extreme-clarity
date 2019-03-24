@@ -30,6 +30,10 @@
 
 # overwrite the table entry at 800D8B70 with an address pointing to me
 
+li      $t1, 0x80079ca0  # PRO mode enabled? (skip money score calculation?)
+lw      $t1, 0($t1)
+bgtz    $t1, ddr_results_unpatch_code # unpatch if not PRO mode
+
 li  $t1, 0x800F0048     # t1 = ptr to global game mode
 lb  $t2, 0($t1)         # t2 = global game mode
 bne $t2, 0, ddr_results_unpatch_code # unpatch if mode other than normal

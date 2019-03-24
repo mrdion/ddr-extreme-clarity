@@ -31,6 +31,10 @@
 
 # jump to me from 0x8005A5A4
 
+li      $t0, 0x80061758  # PRO mode enabled? (marvelous timing?)
+lw      $t0, 0($t0)
+bne     $t0, 0x4010004, ddr_polyft4_set_texcoord_break # don't display with PRO mode off
+
 lhu     $t0, 0x16($a1)   # tpage
 bne     $t0, 0x8ff, ddr_polyft4_set_texcoord_break
 

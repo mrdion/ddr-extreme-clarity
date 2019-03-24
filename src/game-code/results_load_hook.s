@@ -32,6 +32,10 @@
 # jump to me from 80061154
 # need to return to either 8006115C, 80061174, 8006112C, or 800610C0
 
+li      $t1, 0x80079ca0  # PRO mode enabled? (skip money score calculation?)
+lw      $t1, 0($t1)
+bgtz    $t1, ddr_results_load_return_default # skip if PRO mode is off
+
 lw      $t3, 0xd0($sp)                  # t3 = ptr to ddr mode info
 lw      $t3, 0x18($t3)                  # t3 = results mode type (0 if regular, 1 if total)
 
@@ -69,6 +73,10 @@ ddr_results_load_slow_total:
 lw      $s0, 20($t1)                    # s0 is the number to display, s0 = total_slow_count   
 b       ddr_results_load_return_fast_slow_total
 
+ddr_results_load_score:
+li      $t1, 0x8006115C                 # load address of "score" branch
+jr      $t1                             # jump
+
 # ------------------------------------------------------------------------------
 
 ddr_results_load_return_fast_slow:
@@ -81,10 +89,9 @@ li      $t1, 0x800610C0                 # redirect control flow back through cod
                                         # that handles the total results path
 jr      $t1                             # jump
 
-ddr_results_load_score:
-li      $t1, 0x8006115C                 # load address of "score" branch
-jr      $t1                             # jump
-
 ddr_results_load_return_default:
+beq     $t2, $v0, ddr_results_load_score # this is the original instruction that we patched
+
+ddr_results_load_return_one_digit:
 li      $t1, 0x80061174                 # load address of instruction after patch
 jr      $t1                             # jump
