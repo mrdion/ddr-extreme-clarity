@@ -127,7 +127,7 @@ li $t2, 0x24020007
 sw $t2, 0($t1)
 
 li $t1, 0x800611F8
-li $t2, 0x2407FF19
+li $t2, 0x2407FF20
 sw $t2, 0($t1)
 
 # continue
