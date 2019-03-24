@@ -48,7 +48,9 @@ sw $0, 8($t1)   # compressed flag
 li $t2, 0x12e20 # file size
 sw $t2, 12($t1) # store in ft_entry.length
 
-# patch code in results screen draw loop
+# change various immediate values to add the two extra data fields that we need
+# and to not crash or load the incorrect data in a couple of branches during the
+# draw loop.
 li $t1, 0x80061858
 li $t2, 0x2942000a
 sw $t2, 0($t1)
@@ -93,6 +95,8 @@ li $t1, 0x80061650
 li $t2, 0x24020008
 sw $t2, 0($t1)
 
+# since we added two additional score results fields (fast & slow), we need to
+# move the score display down so that it looks proportional
 li $t1, 0x80061264
 li $t2, 0x245effb1
 sw $t2, 0($t1)
@@ -101,6 +105,32 @@ li $t1, 0x80061630
 li $t2, 0x24420001
 sw $t2, 0($t1)
 
+# finally, we need to reduce the number of digits for the score display from 9
+# to 7. otherwise, the system573 will exceed the sprite memory limit as a
+# consequence to adding several new sprites for the fast/slow count. (up to 10
+# new sprites in the case of two players showing the total results screen, which
+# requires four digits for each field.)
+li $t1, 0x80061170
+li $t2, 0x24080007
+sw $t2, 0($t1)
+
+li $t1, 0x800611A0
+li $t2, 0x24020007
+sw $t2, 0($t1)
+
+li $t1, 0x800611AC
+li $t2, 0x24020007
+sw $t2, 0($t1)
+
+li $t1, 0x800611E8
+li $t2, 0x24020007
+sw $t2, 0($t1)
+
+li $t1, 0x800611F8
+li $t2, 0x2407FF19
+sw $t2, 0($t1)
+
+# continue
 b  ddr_results_return
 
 # ------------------------------------------------------------------------------
@@ -118,7 +148,7 @@ sw $t2, 8($t1)  # store in ft_entry.compression_flags
 li $t2, 0x3a0b  # file size
 sw $t2, 12($t1) # store in ft_entry.length
 
-# patch code in results screen draw loop
+# undo all the patches in the results screen draw loop described above
 li $t1, 0x80061858
 li $t2, 0x29420008
 sw $t2, 0($t1)
@@ -169,6 +199,26 @@ sw $t2, 0($t1)
 
 li $t1, 0x80061630
 li $t2, 0x24420017
+sw $t2, 0($t1)
+
+li $t1, 0x80061170
+li $t2, 0x24080009
+sw $t2, 0($t1)
+
+li $t1, 0x800611A0
+li $t2, 0x24020009
+sw $t2, 0($t1)
+
+li $t1, 0x800611AC
+li $t2, 0x24020009
+sw $t2, 0($t1)
+
+li $t1, 0x800611E8
+li $t2, 0x24020009
+sw $t2, 0($t1)
+
+li $t1, 0x800611F8
+li $t2, 0x2407FEEC
 sw $t2, 0($t1)
 
 # ------------------------------------------------------------------------------
