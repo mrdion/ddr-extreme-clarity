@@ -67,5 +67,4 @@ Windows.
 
 TO-DO
 --------------------------------------------------------------------------------
-- Add UI to results screen that shows number of early and late steps.
 - Option to disable feature in TEST menu.
