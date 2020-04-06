@@ -4,6 +4,8 @@ import sys
 import struct
 
 class GsIMAGE:
+    STRUCT_FORMAT = "<IHHHHIHHHHI"
+    
     def __init__(self):
         self.pmode = 0
         self.px = 0
@@ -16,6 +18,10 @@ class GsIMAGE:
         self.cw = 0
         self.ch = 0
         self.clut = 0
+    
+    @classmethod
+    def size(self):
+        return struct.calcsize(self.STRUCT_FORMAT)
     
     def parse(self, bin):
         (
@@ -30,7 +36,7 @@ class GsIMAGE:
             self.cw,
             self.ch,
             self.clut
-        ) = struct.unpack("<IHHHHIHHHHI", bin)
+        ) = struct.unpack(self.STRUCT_FORMAT, bin)
     
     def __str__(self):
         return (
@@ -48,12 +54,13 @@ class GsIMAGE:
         ).format(self=self)
 
 def main(argv):
+    maxsize = GsIMAGE.size()
     data = None
     if len(argv) < 2:
-        data = sys.stdin.buffer.read()
+        data = sys.stdin.buffer.read(maxsize)
     else:
         with open(argv[1], "rb") as f:
-            data = f.read()
+            data = f.read(maxsize)
     
     img = GsIMAGE()
     img.parse(data)
