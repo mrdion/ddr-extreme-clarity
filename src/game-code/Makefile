@@ -6,16 +6,17 @@ SRCS      		:= init_player_stats_hook.s \
 				   vertex_hook.s \
 				   results_load_hook.s \
 				   results_texcoord_hook.s \
-				   results_main_hook.s
+				   results_main_hook.s \
+				   music_select_init_hook.s
 
 BUILD_DIR 		:= ./build
 OBJS      		:= ${SRCS:%.s=${BUILD_DIR}/%.o}
 BINS      		:= ${SRCS:%.s=${BUILD_DIR}/%.bin}
 
-CC              = mips-mti-elf-gcc
+CC              = mips-img-elf-gcc
 CCFLAGS         = -Os -nostartfiles -nostdlib -march=r3000 -EL -fPIC -mabicalls
 
-OBJCOPY         = mips-mti-elf-objcopy
+OBJCOPY         = mips-img-elf-objcopy
 OBJCOPYFLAGS    = -j .text -O binary
 
 MANIFEST_SCRIPT = ./genmanifest.sh

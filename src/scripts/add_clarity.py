@@ -49,6 +49,7 @@ GAME_EXECUTABLE_HOOKS               = [
     ("results_load_hook",       0x80061154,  PatchType.UNCONDITIONAL_JUMP),
     ("results_texcoord_hook",   0x8006C9DC,  PatchType.UNCONDITIONAL_JUMP),
     ("results_main_hook",       0x800D8B70,  PatchType.ADDRESS_TRANSPOSITION),
+    ("music_select_init_hook",  0x80027C64,  PatchType.UNCONDITIONAL_JUMP),
 ]
 
 # ------------------------------------------------------------------------------
