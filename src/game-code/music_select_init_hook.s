@@ -10,9 +10,17 @@
 
 # jump to me from 80027C64
 
+li      $t1, 0x80079ca0  # PRO mode?
+lw      $t1, 0($t1)
+bgtz    $t1, ddr_game_state_init_break
+
 li      $t1, 0x800f003b # event mode?
 lb      $t1, 0($t1)
 beqz    $t1, ddr_game_state_init_break
+
+li      $t1, 0x800f0048 # nonstop/challenge mode?
+lb      $t1, 0($t1)
+bgtz    $t1, ddr_game_state_init_break
 
 li      $t1, 0x800f0030
 li      $t2, 0x00010006
