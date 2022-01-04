@@ -36,6 +36,10 @@ li      $t1, 0x80079ca0  # PRO mode enabled? (skip money score calculation?)
 lw      $t1, 0($t1)
 bgtz    $t1, ddr_results_load_return_default # skip if PRO mode is off
 
+li      $t1, 0x800F0048     # load ptr to global game mode
+lb      $t3, 0($t1)         # load game mode into $t2
+bne     $t3, 0, ddr_results_load_return_default # don't do anything if we're not in normal mode
+
 lw      $t3, 0xd0($sp)                  # t3 = ptr to ddr mode info
 lw      $t3, 0x18($t3)                  # t3 = results mode type (0 if regular, 1 if total)
 
