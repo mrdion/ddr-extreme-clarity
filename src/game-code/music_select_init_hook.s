@@ -15,7 +15,7 @@ lb      $t1, 0($t1)
 beqz    $t1, ddr_game_state_init_break
 
 li      $t1, 0x800f0030
-li      $t2, 0x00010003
+li      $t2, 0x00010006
 sw      $t2, 0($t1)
 
 li      $t2, 1
