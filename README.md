@@ -12,6 +12,18 @@ almost all modern rhythm games. With the addition of "MARVELOUS" timing in
 accurate scoring in a version of the game that has famously had very strict 
 timing.
 
+Features
+--------------------------------------------------------------------------------
+
+- Includes all of the features from *DDR EXTREME PRO v2*.
+- Adds "FAST" and "SLOW" judgment indicators that appear after every step with a
+  combo.
+- Counts the number of early and late steps during gameplay and adds UI to the
+  results screen to display this for each player.
+- **BONUS** Enables infinite gameplay with Event Mode by locking each player on
+  the second stage.
+- Can be disabled along with the other "PRO" features in the Test menu.
+
 Building
 --------------------------------------------------------------------------------
 
@@ -64,7 +76,3 @@ After this has completed successfully, you now have a patched game image that
 you can add to a full disc image and burn to run on a System 573. For this, the
 `mkisofs` tool is recommended on macOS/Linux, and PowerISO is recommended on
 Windows.
-
-TO-DO
---------------------------------------------------------------------------------
-- Option to disable feature in TEST menu.
